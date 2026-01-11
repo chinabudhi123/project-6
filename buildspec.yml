@@ -2,12 +2,13 @@ version: 0.2
 
 phases:
   install:
+    runtime-versions:  # ADD THIS - Fixes "No runtime version" warning
+      docker: 20       # Pre-installed Docker
     commands:
-      # Ubuntu package manager (NOT yum)
-      - apt-get update
-      - apt-get install -y docker.io curl docker-compose
-      - systemctl start docker || service docker start
-      - usermod -aG docker $(whoami)
+      - yum update -y
+      - yum install -y docker curl
+      - service docker start
+      - usermod -a -G docker $(whoami)
       
   pre_build:  # BUILD
     commands:
@@ -16,12 +17,11 @@ phases:
       
   build:       # TEST
     commands:
-      - echo "Running tests..."
       - docker run -d -p 8080:80 --name test-app httpd-demo:latest
       - sleep 15
       - curl -f http://localhost:8080 || exit 1
       - curl http://localhost:8080 | grep "Satyajit" || exit 1
-      - echo "✅ Tests PASSED!"
+      - echo "✅ All tests PASSED!"
       
   post_build:
     commands:
