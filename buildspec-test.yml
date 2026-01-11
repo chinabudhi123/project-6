@@ -1,0 +1,15 @@
+version: 0.2
+phases:
+  install:
+    commands:
+      - yum install -y docker curl
+  build:
+    commands:
+      - docker run -d -p 8080:80 httpd-app
+      - sleep 10
+      - curl -f http://localhost:8080 || exit 1
+      - curl http://localhost:8080 | grep "Satyajit"
+  post_build:
+    commands:
+      - docker stop $(docker ps -q)
+

@@ -1,0 +1,16 @@
+version: 0.2
+phases:
+  install:
+    commands:
+      - yum install -y docker docker-compose
+      - service docker start
+  build:
+    commands:
+      - docker build -t httpd-app .
+      - trivy image httpd-app
+      - docker save httpd-app > httpd-app.tar
+  artifacts:
+    files:
+      - httpd-app.tar
+      - install-httpd.sh
+

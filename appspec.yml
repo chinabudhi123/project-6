@@ -1,0 +1,11 @@
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /opt/httpd-pipeline/
+hooks:
+  AfterInstall:
+    - location: install-httpd.sh
+      timeout: 300
+      runas: root
+
