@@ -9,18 +9,19 @@ phases:
     commands:
       - echo "Building Apache container..."
       - docker build -t httpd-demo .
-      
+
   build:
     commands:
-      - echo "Starting container for testing..."
+      - echo "Starting container..."
       - docker run -d -p 8080:80 --name test-app httpd-demo
-      - echo "Waiting for Apache to start (30s)..."
-      - sleep 30                    # ← INCREASED FROM 10s
-      - docker logs test-app         # Debug: see startup logs
-      - curl -f http://localhost:8080 || exit 1
-      - curl http://localhost:8080 | grep "Satyajit" || exit 1
+      - sleep 35
+      - docker logs test-app  # Debug logs
+      # TEST 1: Docker exec INSIDE container
+      - docker exec test-app wget -qO- localhost:80 || exit 1
+      # TEST 2: Verify content  
+      - docker exec test-app grep "Satyajit" /usr/local/apache2/htdocs/index.html || exit 1
       - echo "✅ All tests PASSED!"
-      
+
   post_build:
     commands:
       - docker stop test-app
