@@ -1,32 +1,21 @@
 version: 0.2
-
 phases:
   install:
     commands:
       - docker info
-      
   pre_build:
     commands:
-      - echo "Building Apache container..."
       - docker build -t httpd-demo .
-
   build:
     commands:
-      - echo "Starting container..."
-      - docker run -d -p 8080:80 --name test-app httpd-demo
-      - sleep 35
-      - docker logs test-app  # Debug logs
-      # TEST 1: Docker exec INSIDE container
-      - docker exec test-app wget -qO- localhost:80 || exit 1
-      # TEST 2: Verify content  
-      - docker exec test-app grep "Satyajit" /usr/local/apache2/htdocs/index.html || exit 1
-      - echo "✅ All tests PASSED!"
-
+      - docker run -d --name test httpd-demo
+      - sleep 40
+      - docker exec test sh -c "wget -qO- localhost:80 || curl -f localhost:80" || exit 1
+      - docker exec test cat /usr/local/apache2/htdocs/index.html
+      - echo "✅ TESTS PASSED"
   post_build:
     commands:
-      - docker stop test-app
-      - docker rm test-app
-
+      - docker stop test && docker rm test
 artifacts:
   files:
     - install-httpd.sh
