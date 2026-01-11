@@ -3,15 +3,15 @@ version: 0.2
 phases:
   install:
     commands:
-      # Docker is pre-installed - just start it
-      - service docker start
+      # Docker is ALREADY RUNNING in Privileged mode
       - docker info
+      - echo "Docker ready!"
       
   pre_build:  # BUILD
     commands:
       - echo "Building Apache container..."
       - docker build -t httpd-demo .
-      - echo "✅ Docker image built!"
+      - echo "✅ Build complete!"
       
   build:  # TEST
     commands:
@@ -20,7 +20,7 @@ phases:
       - sleep 10
       - curl -f http://localhost:8080 || exit 1
       - curl http://localhost:8080 | grep "Satyajit" || exit 1
-      - echo "✅ All tests PASSED!"
+      - echo "✅ Tests PASSED!"
       
   post_build:
     commands:
