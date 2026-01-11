@@ -3,23 +3,21 @@ version: 0.2
 phases:
   install:
     commands:
-      # NO runtime-versions needed for Docker!
-      - yum update -y
-      - yum install -y curl
+      # Docker is pre-installed - just start it
       - service docker start
       - docker info
       
-  pre_build:  # BUILD PHASE
+  pre_build:  # BUILD
     commands:
       - echo "Building Apache container..."
-      - docker build -t httpd-demo:latest .
-      - echo "✅ Build completed!"
+      - docker build -t httpd-demo .
+      - echo "✅ Docker image built!"
       
-  build:       # TEST PHASE
+  build:  # TEST
     commands:
-      - echo "Running integration tests..."
-      - docker run -d -p 8080:80 --name test-app httpd-demo:latest
-      - sleep 15
+      - echo "Running tests..."
+      - docker run -d -p 8080:80 --name test-app httpd-demo
+      - sleep 10
       - curl -f http://localhost:8080 || exit 1
       - curl http://localhost:8080 | grep "Satyajit" || exit 1
       - echo "✅ All tests PASSED!"
@@ -28,7 +26,6 @@ phases:
     commands:
       - docker stop test-app || true
       - docker rm test-app || true
-      - echo "Cleanup complete"
 
 artifacts:
   files:
