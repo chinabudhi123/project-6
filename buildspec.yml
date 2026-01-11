@@ -1,0 +1,36 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - yum update -y && yum install -y docker docker-compose curl
+      - service docker start
+      - usermod -a -G docker ec2-user
+      
+  pre_build:  # BUILD PHASE
+    commands:
+      - echo "Building Apache container..."
+      - docker build -t httpd-demo:latest .
+      - echo "Build completed successfully"
+      
+  build:       # TEST PHASE
+    commands:
+      - echo "Running integration tests..."
+      - docker run -d -p 8080:80 --name test-app httpd-demo:latest
+      - sleep 15
+      - curl -f http://localhost:8080 || exit 1
+      - curl http://localhost:8080 | grep "Satyajit" || exit 1
+      - echo "✅ All tests PASSED!"
+      
+  post_build:
+    commands:
+      - docker stop test-app || true
+      - docker rm test-app || true
+      - echo "Cleanup complete"
+
+artifacts:
+  files:
+    - install-httpd.sh
+    - appspec.yml
+    - index.html
+
