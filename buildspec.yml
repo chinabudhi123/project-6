@@ -3,29 +3,28 @@ version: 0.2
 phases:
   install:
     commands:
-      # Docker is ALREADY RUNNING in Privileged mode
       - docker info
-      - echo "Docker ready!"
       
-  pre_build:  # BUILD
+  pre_build:
     commands:
       - echo "Building Apache container..."
       - docker build -t httpd-demo .
-      - echo "✅ Build complete!"
       
-  build:  # TEST
+  build:
     commands:
-      - echo "Running tests..."
+      - echo "Starting container for testing..."
       - docker run -d -p 8080:80 --name test-app httpd-demo
-      - sleep 10
+      - echo "Waiting for Apache to start (30s)..."
+      - sleep 30                    # ← INCREASED FROM 10s
+      - docker logs test-app         # Debug: see startup logs
       - curl -f http://localhost:8080 || exit 1
       - curl http://localhost:8080 | grep "Satyajit" || exit 1
-      - echo "✅ Tests PASSED!"
+      - echo "✅ All tests PASSED!"
       
   post_build:
     commands:
-      - docker stop test-app || true
-      - docker rm test-app || true
+      - docker stop test-app
+      - docker rm test-app
 
 artifacts:
   files:
