@@ -2,21 +2,22 @@ version: 0.2
 
 phases:
   install:
-    runtime-versions:  # ADD THIS - Fixes "No runtime version" warning
-      docker: 20       # Pre-installed Docker
     commands:
+      # NO runtime-versions needed for Docker!
       - yum update -y
-      - yum install -y docker curl
+      - yum install -y curl
       - service docker start
-      - usermod -a -G docker $(whoami)
+      - docker info
       
-  pre_build:  # BUILD
+  pre_build:  # BUILD PHASE
     commands:
       - echo "Building Apache container..."
       - docker build -t httpd-demo:latest .
+      - echo "✅ Build completed!"
       
-  build:       # TEST
+  build:       # TEST PHASE
     commands:
+      - echo "Running integration tests..."
       - docker run -d -p 8080:80 --name test-app httpd-demo:latest
       - sleep 15
       - curl -f http://localhost:8080 || exit 1
@@ -27,6 +28,7 @@ phases:
     commands:
       - docker stop test-app || true
       - docker rm test-app || true
+      - echo "Cleanup complete"
 
 artifacts:
   files:
